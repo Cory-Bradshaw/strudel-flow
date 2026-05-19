@@ -1,8 +1,10 @@
-# Strudel Flow
+# Strata
 
-A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
+> Strata is a fork of [strudel-flow](https://github.com/xyflow/strudel-flow). It is licensed under **AGPL-3.0-or-later** (the upstream license); see [LICENSE](LICENSE), [CHANGELOG-FORK.md](CHANGELOG-FORK.md), and [STRATA.md](STRATA.md) for the design.
 
-[Live Demo](https://xyflow.com/strudel-flow)
+A visual music tool for building songs out of reusable **parts**. Parts are authored on a node-graph canvas (a fork of strudel-flow); songs are assembled on a separate **Arranger** surface that generates Strudel's stacking and sequencing automatically. Built on [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), [Tailwind CSS](https://tailwindcss.com/), and [shadcn/ui](https://ui.shadcn.com/).
+
+> The README below is inherited from strudel-flow and still describes the current node set. It will diverge from Strata's surface as the milestones in [STRATA.md](STRATA.md) land.
 
 ## Table of Contents
 

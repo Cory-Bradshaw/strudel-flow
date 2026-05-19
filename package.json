@@ -1,8 +1,12 @@
 {
-  "name": "strudel-flow",
+  "name": "strata",
   "version": "0.0.0",
   "type": "module",
-  "description": "A visual drum machine and pattern sequencer built with Strudel and React Flow.",
+  "description": "Strata — a visual music tool for building songs out of reusable parts. Fork of strudel-flow, built on Strudel and React Flow.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cory-Bradshaw/strudel-flow"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -23,10 +27,11 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.4",
-    "@strudel/web": "^1.2.3",
+    "@strudel/web": "1.2.5",
     "@xyflow/react": "^12.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "idb": "^8.0.3",
     "lucide-react": "^0.456.0",
     "lz-string": "^1.5.0",
     "nanoid": "^5.0.9",
@@ -36,7 +41,7 @@
     "tailwindcss": "^4.1.10",
     "zustand": "^5.0.1"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.10",
     "@types/node": "^24.0.1",
