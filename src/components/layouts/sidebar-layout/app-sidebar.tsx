@@ -5,7 +5,7 @@ import {
   useRef,
   ChangeEvent,
 } from 'react';
-import { Command, GripVertical, Plus, Save, Upload } from 'lucide-react';
+import { Command, GripVertical, Plus, Save, Sparkles, Upload } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
 import {
@@ -27,6 +27,11 @@ import nodesConfig, {
   createNodeByType,
   type NodeConfig,
 } from '@/components/nodes';
+import {
+  ALL_ENTRIES as MANIFEST_ENTRIES,
+  type ManifestEntry,
+} from '@/flow/manifest';
+import { createTransformNode } from '@/flow/transform-node';
 import { cn } from '@/lib/utils';
 import { iconMapping } from '@/data/icon-mapping';
 import { useAppStore } from '@/store/app-context';
@@ -136,10 +141,11 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
           <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
             <Command className="size-3" />
           </div>
-          <span className="truncate font-semibold">Strudel Flow</span>
+          <span className="truncate font-semibold">Strata</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
+        <ManifestPalette />
         {Object.entries(nodesByCategory).map(([category, nodes]) => (
           <SidebarGroup key={category}>
             <SidebarGroupLabel className="text-xs font-medium text-muted-foreground capitalize">
@@ -205,6 +211,69 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
 const selector = (state: AppStore) => ({
   addNode: state.addNode,
 });
+
+/**
+ * M2 manifest-driven transforms — the new generic TransformNode and its
+ * starter manifest entries. Lives in a separate sidebar section during M2
+ * so the kids can see "new" vs the inherited bespoke nodes, and so the
+ * higher-order port prototype (jux) is easy to find for kid testing.
+ *
+ * Folds into the regular palette once the inherited effect nodes are
+ * migrated onto manifest entries (M2 phase 4).
+ */
+function ManifestPalette() {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground capitalize">
+        Transforms (M2 preview)
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {MANIFEST_ENTRIES.map((entry) => (
+            <ManifestPaletteItem key={entry.id} entry={entry} />
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
+
+function ManifestPaletteItem({ entry }: { entry: ManifestEntry }) {
+  const { screenToFlowPosition } = useReactFlow();
+  const { addNode } = useAppStore(useShallow(selector));
+
+  const onClick = useCallback(() => {
+    const node = createTransformNode(
+      entry.id,
+      screenToFlowPosition({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      })
+    );
+    // The store's AppNode union does not yet include the M2 transform
+    // arm (the inherited types would cascade — see audit). React Flow
+    // accepts the node at runtime; the cast is scoped here.
+    addNode(node as unknown as AppNode);
+  }, [entry.id, addNode, screenToFlowPosition]);
+
+  return (
+    <SidebarMenuItem
+      className="relative border-2 active:scale-[.99] rounded-md border"
+      onClick={onClick}
+      key={entry.id}
+    >
+      <SidebarMenuButton className="bg-card cursor-pointer">
+        <Sparkles className="size-4" />
+        <span>{entry.label}</span>
+        {entry.kind === 'higher-order' && (
+          <span className="ml-auto rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-700 dark:text-amber-300">
+            HO
+          </span>
+        )}
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
 
 function DraggableItem(props: NodeConfig) {
   const { screenToFlowPosition } = useReactFlow();

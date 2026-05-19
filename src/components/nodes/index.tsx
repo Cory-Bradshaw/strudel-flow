@@ -3,6 +3,10 @@ import { nanoid } from 'nanoid';
 
 import { iconMapping } from '@/data/icon-mapping';
 import { CellState } from './instruments/pad-utils';
+import {
+  TransformNode as M2TransformNode,
+  TRANSFORM_NODE_TYPE,
+} from '@/flow/transform-node';
 
 import { SynthSelectNode } from './synths/synth-select-node';
 import { DrumSoundsNode } from './synths/drum-sounds-node';
@@ -306,6 +310,7 @@ const nodesConfig: Record<AppNodeType, NodeConfig> = {
 };
 
 export const nodeTypes = {
+  [TRANSFORM_NODE_TYPE]: M2TransformNode,
   'synth-select-node': SynthSelectNode,
   'pad-node': PadNode,
   'arpeggiator-node': ArpeggiatorNode,

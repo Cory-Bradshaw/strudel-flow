@@ -129,8 +129,13 @@ export type InputValue =
 /** A node's per-input state — what the persistence layer round-trips. */
 export type TransformNodeInputs = Record<string, InputValue>;
 
+/**
+ * Index signature is for React Flow's `Node<TData extends Record<string, unknown>>`
+ * constraint — we never read arbitrary keys, but TS needs it for assignability.
+ */
 export interface TransformNodeData {
   /** Manifest id for the entry this node renders. */
   fn: string;
   inputs: TransformNodeInputs;
+  [key: string]: unknown;
 }

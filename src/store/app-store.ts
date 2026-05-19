@@ -78,7 +78,7 @@ export const createAppStore = (initialState: AppState = defaultState) => {
       ...initialState,
 
       onNodesChange: async (changes) => {
-        const nextNodes = applyNodeChanges(changes, get().nodes);
+        const nextNodes = applyNodeChanges(changes, get().nodes) as AppNode[];
         set({ nodes: nextNodes });
       },
 
@@ -157,7 +157,7 @@ export const createAppStore = (initialState: AppState = defaultState) => {
             node.id === nodeId
               ? { ...node, data: { ...node.data, ...updates } }
               : node
-          );
+          ) as AppNode[];
 
           return { nodes: updatedNodes };
         });
