@@ -1,5 +1,15 @@
 /**
- * Strudel pattern generation and optimization
+ * Strudel pattern generation and optimization.
+ *
+ * M2 transition: components containing the new manifest-driven
+ * TransformNode are emitted through src/flow/codegen (the new
+ * edge-traversing generator) with a sourceEmitter that bridges
+ * inherited Tier-1 composite source nodes (Pad, Beat Machine, ...).
+ *
+ * Components with only inherited nodes still run through the old
+ * connected-component pipeline — those nodes will collapse onto
+ * manifest entries during the M2 migration step and the old branch
+ * can then be deleted.
  */
 
 import { Edge } from '@xyflow/react';
@@ -8,6 +18,8 @@ import nodesConfig from '@/components/nodes';
 import { useStrudelStore } from '@/store/strudel-store';
 import { getNodeStrudelOutput } from './node-registry';
 import { findConnectedComponents } from './graph-utils';
+import { emitPart } from '@/flow/codegen';
+import { TRANSFORM_NODE_TYPE } from '@/flow/transform-node';
 
 /**
  * Optimize consecutive .sound() calls by combining them recursively
@@ -73,19 +85,43 @@ export function generateOutput(
       .map((id) => nodes.find((n) => n.id === id))
       .filter(Boolean) as AppNode[];
 
-    const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
-      ([src, eff], node) => {
-        isSoundSource(node) ? src.push(node) : eff.push(node);
-        return [src, eff];
-      },
-      [[], []]
-    );
-
+    const sources = componentNodes.filter(isSoundSource);
     if (sources.length === 0) continue;
 
     const allSourcesPaused = sources.every(
       (node) => node.data.state === 'paused'
     );
+
+    // Cast: AppNode union doesn't yet include the M2 transform arm, but
+    // React Flow stores the type string verbatim. See M1 audit.
+    const hasTransformNodes = componentNodes.some(
+      (n) => (n.type as string) === TRANSFORM_NODE_TYPE
+    );
+
+    if (hasTransformNodes) {
+      // New manifest-driven path: walk back from the terminal, bridging
+      // inherited source nodes via the sourceEmitter callback.
+      const componentIdSet = new Set(componentNodeIds);
+      const subgraph = {
+        nodes: componentNodes,
+        edges: edges.filter(
+          (e) => componentIdSet.has(e.source) && componentIdSet.has(e.target)
+        ),
+      };
+      const code = emitPart(subgraph, {
+        sourceEmitter: (node) => nodePatterns[node.id] ?? null,
+      });
+      if (code) {
+        finalPatterns.push({
+          pattern: optimizeSoundCalls(code),
+          paused: allSourcesPaused,
+        });
+      }
+      continue;
+    }
+
+    // Legacy path: inherited-only components.
+    const effects = componentNodes.filter((n) => !isSoundSource(n));
     const activePatterns = (
       allSourcesPaused
         ? sources

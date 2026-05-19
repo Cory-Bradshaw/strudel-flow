@@ -115,11 +115,14 @@ export function useWorkflowRunner() {
         return;
       }
 
-      // For other changes, debounce to batch rapid UI interactions
+      // For other changes, debounce to batch rapid UI interactions.
+      // STRATA.md §5.6: regenerate on commit, not on every drag — 200ms
+      // is the keyboard-idle window from the eval policy, and pointer-up
+      // after a slider drag naturally lands within it.
       debounceTimerId.current = window.setTimeout(() => {
         evaluatePattern(patternToEvaluate);
         debounceTimerId.current = null;
-      }, 50); // 50ms debounce for UI interactions
+      }, 200);
     },
     [evaluatePattern]
   );
